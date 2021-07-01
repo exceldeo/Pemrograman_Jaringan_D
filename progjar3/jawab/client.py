@@ -38,7 +38,7 @@ def kirim_multi_process_sync(daftar=None):
 
 def multi_process_sync():
     texec = dict()
-    daftar = ['Background.jpg', 'ITS.png']
+    daftar = ['testing1.png', 'testing2.jpeg']
 
     catat_awal = datetime.datetime.now()
     for k in range(len(daftar)):
@@ -65,7 +65,7 @@ def kirim_multi_process_async(daftar=None):
 
 def multi_process_async():
     texec = dict()
-    daftar = ['Background.jpg', 'ITS.png']
+    daftar = ['testing1.png', 'testing2.jpeg']
     status_task = dict()
     task_pool = Pool(processes=20)
     catat_awal = datetime.datetime.now()
@@ -93,7 +93,7 @@ def kirim_multi_thread_sync(daftar=None):
 
 def multi_thread_sync():
     texec = dict()
-    daftar = ['Background.jpg', 'ITS.png']
+    daftar = ['testing1.png', 'testing2.jpeg']
 
     catat_awal = datetime.datetime.now()
     for k in range(len(daftar)):
@@ -120,7 +120,7 @@ def kirim_multi_thread_async(daftar=None):
 
 def multi_thread_async():
     texec = dict()
-    daftar = ['Background.jpg', 'ITS.png']
+    daftar = ['testing1.png', 'testing2.jpeg']
     status_task = dict()
     task = concurrent.futures.ThreadPoolExecutor(max_workers=4)
     
