@@ -1,68 +1,167 @@
-# JALANIN INI
-# apk add --no-cache gcc python3-dev jpeg-dev zlib-dev
-# apk add --no-cache --virtual .build-deps build-base linux-headers
-# pip install Pillow
-
-
-import socket as sk
-from socket import *
-import os
-import sys
-import hashlib
+from library import download_gambar, get_url_list
 import time
+import socket
+import logging
+import datetime
+import threading
+import concurrent.futures
+from multiprocessing import Process, Pool
 
-SERVER_NAME = "INS"
+#target IP kirim_sync
+TARGET_IP = "192.168.122.255" #Bcast = Broadcast Address
+TARGET_PORT = 5005
 
-serverIp = "192.168.1.45"
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEPORT, 1)
+sock.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST, 1)
 
-host = "" # IP Client
-clientPort = 10001 # Port Client
-serverAddr = None
-buffer = 1024
-data = ""
-filePath = os.getcwd()+ "/ClientFiles" # Path file client
-saveToFile = "" # filename from server to save
-COUNTER = 0 # Menghitung percobaan unduh
-SENDFILE = "" # Daftar file yang ingin diunduh
+def single_thread():
+    urls = get_url_list()
 
-# Daftar perintah
-LIST = "LIST" # Request daftar file
-FILE = "FILE" # Request file yang akan dikirim 
-NACK = "NACK" # ACK Positif
-PACK =  "PACK" # ACK Negatif
-CHECK = "CHECK" # Checksum dari server
+    catat = datetime.datetime.now()
+    for k in urls:
+        print(f"mendownload {urls[k]}")
+        waktu_proses = download_gambar(urls[k])
+        print(f"completed {waktu_proses} detik")
+    selesai = datetime.datetime.now() - catat
+    print(f"Waktu TOTAL yang dibutuhkan {selesai} detik")
 
-# Ambil IP dari server
-host = sk.gethostbyname(sk.gethostname())
+def kirim_multi_process_sync(daftar=None):
+    if (daftar is None):
+        return False
+    f = open(daftar,"rb")
+    l = f.read(1024)
+    while (l):
+        if(sock.sendto(l, (TARGET_IP, TARGET_PORT))):
+                l = f.read(1024)
+    f.close()
 
-# Membuat socket server
-clientSocket = None
-def initSocket():
-   "Inisialisasi koneksi dengan server"
-   global clientSocket
-   global serverAddr
-   global serverIp
-   serverAddr = (serverIp,10000)
-   clientSocket = None # definisi ulang
-   clientSocket = socket(AF_INET, SOCK_DGRAM)
-   clientSocket.bind((host,clientPort))
-initSocket()
+def multi_process_sync():
+    texec = dict()
+    daftar = ['Background.jpg', 'ITS.png']
 
-# Apabila folder filePath belum ada, maka buat folder tersebut
-if not os.path.exists(filePath):
-   os.mkdir(filePath)
+    catat_awal = datetime.datetime.now()
+    for k in range(len(daftar)):
+        print(f"mengirim {daftar[k]}")
+        texec[k] = Process(target=kirim_multi_process_sync, args=(daftar[k],))
+        texec[k].start()
+    for k in range(len(daftar)):
+        texec[k].join()
+
+    catat_akhir = datetime.datetime.now()
+    selesai = catat_akhir - catat_awal
+    print(f"Waktu TOTAL yang dibutuhkan {selesai} detik {catat_awal} s/d {catat_akhir}")
+
+
+def kirim_multi_process_async(daftar=None):
+    if (daftar is None):
+        return False
+    f = open(daftar,"rb")
+    l = f.read(1024)
+    while (l):
+        if(sock.sendto(l, (TARGET_IP, TARGET_PORT))):
+                l = f.read(1024)
+    f.close()
+
+def multi_process_async():
+    texec = dict()
+    daftar = ['Background.jpg', 'ITS.png']
+    status_task = dict()
+    task_pool = Pool(processes=20)
+    catat_awal = datetime.datetime.now()
+    for k in range(len(daftar)):
+        print(f"mengirim {daftar[k]}")
+        texec[k] = task_pool.apply_async(func=kirim_multi_process_async, args=(daftar[k],))
+    for k in range(len(daftar)):
+        status_task[k]=texec[k].get(timeout=10)
+
+    catat_akhir = datetime.datetime.now()
+    selesai = catat_akhir - catat_awal
+    print(f"Waktu TOTAL yang dibutuhkan {selesai} detik {catat_awal} s/d {catat_akhir}")
+    print("status TASK")
+    print(status_task)
+
+def kirim_multi_thread_sync(daftar=None):
+    if (daftar is None):
+        return False
+    f = open(daftar,"rb")
+    l = f.read(1024)
+    while (l):
+        if(sock.sendto(l, (TARGET_IP, TARGET_PORT))):
+                l = f.read(1024)
+    f.close()
+
+def multi_thread_sync():
+    texec = dict()
+    daftar = ['Background.jpg', 'ITS.png']
+
+    catat_awal = datetime.datetime.now()
+    for k in range(len(daftar)):
+        print(f"mengirim {daftar[k]}")
+        texec[k] = threading.Thread(target=kirim_multi_thread_sync, args=(daftar[k],))
+        texec[k].start()
+    for k in range(len(daftar)):
+        texec[k].join()
+
+    catat_akhir = datetime.datetime.now()
+    selesai = catat_akhir - catat_awal
+    print(f"Waktu TOTAL yang dibutuhkan {selesai} detik {catat_awal} s/d {catat_akhir}")
+
+
+def kirim_multi_thread_async(daftar=None):
+    if (daftar is None):
+        return False
+    f = open(daftar,"rb")
+    l = f.read(1024)
+    while (l):
+        if(sock.sendto(l, (TARGET_IP, TARGET_PORT))):
+                l = f.read(1024)
+    f.close()
+
+def multi_thread_async():
+    texec = dict()
+    daftar = ['Background.jpg', 'ITS.png']
+    status_task = dict()
+    task = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+    
+    catat_awal = datetime.datetime.now()
+    for k in range(len(daftar)):
+        print(f"mendownload {daftar[k]}")
+        waktu = time.time()
+        texec[k] = task.submit(kirim_multi_thread_async, daftar[k])
+    for k in range(len(daftar)):
+        status_task[k]=texec[k].result()
+
+    catat_akhir = datetime.datetime.now()
+    selesai = catat_akhir - catat_awal
+    print(f"Waktu TOTAL yang dibutuhkan {selesai} detik {catat_awal} s/d {catat_akhir}")
+    print("hasil task yang dijalankan")
+    print(status_task)
+
 
 def menu():
    'Menu pada user'
    while True:
       time.sleep(0.5)
       print("\n=========== Masukkan Perintah ===========")
-      print("Ketik 'proses' untuk melakukan image processing")
+      print("Ketik '1' untuk melakukan Single Thread")
+      print("Ketik '2' untuk melakukan Multi Process Sync")
+      print("Ketik '3' untuk melakukan Multi Process Async")
+      print("Ketik '4' untuk melakukan Multi thread Sync")
+      print("Ketik '5' untuk melakukan Multi thread Async")
       print("Ketik 'keluar' untuk menutup aplikasi\n")
       time.sleep(0.5)
       command = input("Perintah > ")
-      if command == "proses":
-         process()
+      if command == "1":
+         single_thread()
+      elif command == "2":
+         multi_process_sync()
+      elif command == "3":
+         multi_process_async()
+      elif command == "4":
+         multi_thread_async()
+      elif command == "5":
+         multi_thread_sync()
       elif command == "keluar":
          closeApp()
       else:
@@ -77,26 +176,6 @@ def closeApp():
    clientSocket.close() # Menutup socket
    sys.exit() # Keluar menuju ke sistem
 
-def process():
-   'Melakukan image processing pada server'
-   global serverAddr
-   try:
-      clientSocket.sendto("PROCESS".encode("utf-8"), serverAddr)
-   except Exception:
-      print("Koneksi ke server gagal")
-      clientSocket.close() # Menutup socket
-      initSocket() # Membuka socket
-      return
-   print("Menuggu server selesai memproses gambar.")
-   data, serverAddr = clientSocket.recvfrom(buffer)
-   time.sleep(0.5)
-   totalTime = data.decode("utf-8").strip()
-   totalTime = totalTime.split("\t")
-   print("Waktu image processing dengan multiprocessing adalah: ", totalTime[0], " seconds")
-   print("Waktu image processing dengan multithreading adalah: ", totalTime[1], " seconds")
-   print("Waktu image processing dengan multiprocessing asynchronous adalah: ", totalTime[2], " seconds")
-   print("Waktu image processing dengan multithreading asynchronous adalah: ", totalTime[3], " seconds")
-   return
-
 # Menampilkan menu
 menu()
+
