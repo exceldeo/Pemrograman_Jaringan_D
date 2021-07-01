@@ -6,6 +6,8 @@ import datetime
 import threading
 import concurrent.futures
 from multiprocessing import Process, Pool
+import os
+import sys
 
 #target IP kirim_sync
 TARGET_IP = "192.168.122.255" #Bcast = Broadcast Address
