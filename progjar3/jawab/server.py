@@ -13,9 +13,6 @@ import datetime
 import concurrent.futures
 import threading
 import multiprocessing as mp
-from PIL import Image, ImageFilter
-
-
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -148,28 +145,6 @@ def putToLog(curDTime, cAddr, fName, message):
     tempList = [cAddr,fName, message]
     logDict[curDTime] = tempList 
     print(logDict)
-
-def getImage():
-    "Menyimpan daftar gambar pada list"
-    filesList = []
-    for root, dirs, files in os.walk(filePath):
-        if(root is filePath):
-            for file in files:
-                filesList.append(os.path.join(filePath,file))
-    return filesList
-
-def process_image(process, img_name):
-    "Proses blur gambar"
-    size = (100, 100)
-    path, file_name = os.path.split(img_name)
-    img = Image.open(img_name)
-
-    # Filter gambar dengan gaussian blur
-    img = img.filter(ImageFilter.GaussianBlur(15))
-
-    img.thumbnail(size)
-    img.save(f"img/{process}/proses-{file_name}")
-    print(f'{file_name} telah difilter')
 
 def helperMultiprocessing(x):
     return process_image("multiprocessing", x)
