@@ -48,6 +48,14 @@ clientAddr = (host,clientPort)
 
 def listen():
     'Server menunggu client dan menerima koneksi'
+    
+    print("Waiting for clients on port", serverPort, " for UDP connection...")
+    try:
+        data,clientAddr = serverSocket.recvfrom(buffer)
+    except ConnectionResetError:
+        print("Client connection lost due to some reason...")
+        listen() #return to listing again
+    print("Connected to client - ip:", clientAddr[0], " to port ", clientAddr[1])
 
     try:
         data,clientAddr = serverSocket.recvfrom(buffer)
