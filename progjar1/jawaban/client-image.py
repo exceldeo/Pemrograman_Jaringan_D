@@ -2,7 +2,7 @@ import sys
 import socket
 
 # Server Address
-ipserv = ['192.168.122.32', '192.168.122.83']
+ipserv = ['192.168.122.63', '192.168.122.198']
 
 count = 0
 for i in ipserv:
@@ -17,7 +17,7 @@ for i in ipserv:
 
         try:
                 # Send data
-                img = "image.png"
+                img = "Topologi.png"
                 imgfile = open(img, 'rb')
                 imgbytes = imgfile.read()
                 print(f"sending {img}")

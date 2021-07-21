@@ -4,7 +4,7 @@ import random
 import string
 
 # Server Address
-ipserv = ['192.168.122.32', '192.168.122.83']
+ipserv = ['192.168.122.63', '192.168.122.198']
 
 for i in ipserv:
         # Create a TCP/IP socket
