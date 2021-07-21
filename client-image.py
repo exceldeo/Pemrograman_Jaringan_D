@@ -17,7 +17,7 @@ for i in ipserv:
 
         try:
                 # Send data
-                img = "image.png"
+                img = "Topologi.png"
                 imgfile = open(img, 'rb')
                 imgbytes = imgfile.read()
                 print(f"sending {img}")
