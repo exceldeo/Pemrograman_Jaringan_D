@@ -1,8 +1,10 @@
 import sys
 import socket
+import random
+import string
 
 # Server Address
-ipserv = ['192.168.122.193', '192.168.122.130']
+ipserv = ['192.168.122.63', '192.168.122.198']
 
 for i in ipserv:
         # Create a TCP/IP socket
@@ -16,7 +18,9 @@ for i in ipserv:
 
         try:
                 # Send data
-                message = 'INI ADALAH DATA YANG DIKIRIM ABCDEFGHIJKLMNOPQ'
+                # Change N from 100 to 2000000 (2mb)
+                N = 100 
+                message = ''.join(random.choices(string.ascii_uppercase, k = N))
                 print(f"sending {message}")
                 sock.sendall(message.encode())
                 # Look for the response
